@@ -5,7 +5,8 @@ const connectDB = require('./config/db'); // Asegúrate de tener este archivo
 const registerRoute = require('./routes/registerRoute'); // Ajusta la ruta según tu estructura
 const loginRoute = require('./routes/loginRoute');
 const userRoute = require('./routes/userRoutes');
-
+const postRoute = require('./routes/postRoutes');
+const messageRoutes = require('./routes/messageRoute');
 
 const app = express();
 
@@ -23,6 +24,11 @@ app.use('/register', registerRoute);
 app.use('/login', loginRoute);
 
 app.use('/feed', userRoute);
+
+app.use('/post', postRoute);
+
+app.use('/messages', messageRoutes);
+
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

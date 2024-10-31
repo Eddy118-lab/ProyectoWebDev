@@ -1,43 +1,159 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import Header from './Header';
 
 const Home = () => {
-    const navigate = useNavigate();
+    const [posts, setPosts] = useState([]);
+    const [showLikedPosts, setShowLikedPosts] = useState(false);
+    const [showSavedPosts, setShowSavedPosts] = useState(false);
 
-    const handleProfileClick = () => {
-        navigate('/feed/user/info'); // Redirige a la ruta del perfil
+    const fetchPosts = async () => {
+        try {
+            const response = await axios.get('http://localhost:5000/post/feed', {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
+                },
+            });
+            const updatedPosts = response.data.map(post => ({
+                ...post,
+                liked: post.liked || false,
+                saved: post.saved || false,
+            }));
+            setPosts(updatedPosts);
+        } catch (error) {
+            console.error('Error al obtener las publicaciones:', error);
+        }
+    };
+
+    useEffect(() => {
+        fetchPosts();
+    }, []);
+
+    const updateLikeOnServer = async (postId, liked) => {
+        try {
+            await axios.post(`http://localhost:5000/post/${postId}/like`, { liked }, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
+                },
+            });
+        } catch (error) {
+            console.error('Error al actualizar el like:', error);
+        }
+    };
+
+    const updateSaveOnServer = async (postId, saved) => {
+        try {
+            await axios.post(`http://localhost:5000/post/${postId}/save`, { saved }, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
+                },
+            });
+        } catch (error) {
+            console.error('Error al actualizar el guardado:', error);
+        }
+    };
+
+    const handleLike = async (postId) => {
+        const updatedPosts = posts.map(post => {
+            if (post._id === postId) {
+                const newLikedStatus = !post.liked;
+                const newLikesCount = newLikedStatus ? post.likes + 1 : post.likes - 1;
+                return { ...post, liked: newLikedStatus, likes: newLikesCount };
+            }
+            return post;
+        });
+        setPosts(updatedPosts);
+
+        const liked = updatedPosts.find(post => post._id === postId).liked;
+        await updateLikeOnServer(postId, liked);
+    };
+
+    const handleSave = async (postId) => {
+        const updatedPosts = posts.map(post => {
+            if (post._id === postId) {
+                return { ...post, saved: !post.saved };
+            }
+            return post;
+        });
+        setPosts(updatedPosts);
+
+        const saved = updatedPosts.find(post => post._id === postId).saved;
+        await updateSaveOnServer(postId, saved);
+    };
+
+    const likedPosts = posts.filter(post => post.liked);
+    const savedPosts = posts.filter(post => post.saved);
+
+    const displayedPosts = showLikedPosts ? likedPosts : showSavedPosts ? savedPosts : posts;
+
+    const handleGoHome = () => {
+        setShowLikedPosts(false);
+        setShowSavedPosts(false);
     };
 
     return (
-        <div className="d-flex">
-            {/* Sidebar */}
-            <div className="bg-light border-end" style={{ width: '250px', minHeight: '100vh' }}>
-                <h4 className="text-center mt-3">Menú</h4>
-                <ul className="list-unstyled ps-3">
-                    <li className="my-2">
-                        <button className="btn btn-outline-primary w-100" onClick={handleProfileClick}>
-                            Perfil
-                        </button>
-                    </li>
-                    {/* Otras opciones adicionales */}
-                    <li className="my-2">
-                        <button className="btn btn-outline-secondary w-100" disabled>
-                            Opción X
-                        </button>
-                    </li>
-                    <li className="my-2">
-                        <button className="btn btn-outline-secondary w-100" disabled>
-                            Opción Y
-                        </button>
-                    </li>
-                </ul>
-            </div>
+        <div>
+            <Header
+                onLikeClick={() => setShowLikedPosts(prev => !prev)}
+                onSaveClick={() => setShowSavedPosts(prev => !prev)}
+                onHomeClick={handleGoHome} // Añadir esta línea
+            />
+            <div className="container mt-5 pt-5">
+                <h2 className="my-4 text-center" style={{ color: '#343a40' }}>
+                    {showLikedPosts ? 'Publicaciones a las que diste Like' : showSavedPosts ? 'Publicaciones Guardadas' : 'Publicaciones de otros usuarios'}
+                </h2>
 
-            {/* Contenido Principal */}
-            <div className="container mt-5 text-center">
-                <h1>Bienvenido</h1>
-                <p>Explora las opciones en el menú lateral para acceder a distintas secciones.</p>
+                {posts.length > 0 ? (
+                    <div className="row justify-content-center">
+                        {displayedPosts.map(post => (
+                            <div key={post._id} className="col-md-8 mb-4">
+                                <div className="card shadow-sm border-0" style={{ maxHeight: '600px' }}>
+                                    <div className="card-header d-flex align-items-center">
+                                        <img
+                                            src={post.user_id.fotoPerfil || 'default-profile.png'}
+                                            alt="Profile"
+                                            className="rounded-circle me-2"
+                                            style={{ width: '40px', height: '40px', objectFit: 'cover' }}
+                                        />
+                                        <h5 className="mb-0">{post.user_id.nombreUsuario}</h5>
+                                    </div>
+                                    {post.imagen_url && (
+                                        <img
+                                            src={post.imagen_url}
+                                            alt="Post"
+                                            className="card-img-top rounded"
+                                            style={{ objectFit: 'cover', height: '250px', width: '100%' }}
+                                        />
+                                    )}
+                                    <div className="card-body">
+                                        <p className="card-text" style={{ maxHeight: '100px', overflow: 'hidden' }}>
+                                            {post.contenido}
+                                        </p>
+                                        <div className="d-flex justify-content-between">
+                                            <span>
+                                                <i
+                                                    className={`fa${post.liked ? 's' : 'r'} fa-heart me-2 text-danger`}
+                                                    onClick={() => handleLike(post._id)}
+                                                    style={{ cursor: 'pointer' }}
+                                                ></i>
+                                                {post.likes} Me gusta
+                                                <i className="far fa-comment me-2 ms-3" style={{ cursor: 'pointer' }}></i>
+                                                <i className="far fa-paper-plane" style={{ cursor: 'pointer' }}></i>
+                                            </span>
+                                            <i
+                                                className={`fa${post.saved ? 's' : 'r'} fa-bookmark`}
+                                                onClick={() => handleSave(post._id)}
+                                                style={{ cursor: 'pointer' }}
+                                            ></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <p className="text-muted text-center">No hay publicaciones disponibles.</p>
+                )}
             </div>
         </div>
     );

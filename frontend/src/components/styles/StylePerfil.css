@@ -1,0 +1,55 @@
+.dot {
+    display: inline-block;
+    width: 8px; /* Tamaño del punto */
+    height: 8px; /* Tamaño del punto */
+    border-radius: 50%; /* Círculo */
+    background-color: gray; /* Color del fondo */
+    margin: 0 2px; /* Espaciado entre los puntos */
+    vertical-align: middle; /* Alineación vertical */
+}
+
+/* Tarjeta de cada publicación */
+.card {
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Imagen superior de la tarjeta */
+.card-img-top {
+    height: 200px;
+    object-fit: cover;
+    filter: brightness(0.9);
+    transition: filter 0.3s ease;
+}
+
+.card-img-top:hover {
+    filter: brightness(1);
+}
+
+/* Texto de descripción en la tarjeta */
+.card-body {
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.card-text {
+    font-size: 0.95rem;
+    color: #555;
+    margin-bottom: 10px;
+    line-height: 1.4;
+    text-align: justify;
+}
+
+/* Suavizado del botón de opciones */
+.dropdown-toggle::after {
+    display: none;
+}
