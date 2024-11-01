@@ -8,6 +8,7 @@ import PostComponent from './components/PostComponent';
 import Header from './components/Header';
 import Inbox from './components/inbox';
 import FriendRequests from './components/FriendRequests';
+import FriendList from './components/FriendList';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -43,6 +44,7 @@ function App() {
             <Route path="/post/user" element={<PostComponent />} />
             <Route path="/amigos" element={<FriendRequests />} />
             <Route path="/chat" element={<Inbox />} />
+            <Route path="/list/friends" element={<FriendList />} />
           </>
         ) : (
           <Route path="*" element={<Navigate to="/login/form" />} />

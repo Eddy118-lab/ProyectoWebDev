@@ -14,7 +14,7 @@ const friendSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['pending', 'accepted', 'rejected'],
+        enum: ['pending', 'accepted', 'rejected', 'deleted'],
         default: 'pending' // Estado inicial es 'pendiente'
     }
 }, {

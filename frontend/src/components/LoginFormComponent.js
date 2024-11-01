@@ -55,7 +55,7 @@ const LoginFormComponent = ({ setIsAuthenticated }) => {
 
     return (
         <div className="container mt-5 d-flex justify-content-center">
-            <div className="card shadow-lg p-4" style={{ maxWidth: '400px', width: '100%', borderRadius: '15px' }}>
+            <div className="card shadow-lg p-4" style={{ margintop: '120px', maxWidth: '400px', width: '100%', borderRadius: '15px' }}>
                 <h2 className="text-center text-primary mb-4">Iniciar Sesión</h2>
                 <form onSubmit={handleSubmit}>
                     <div className="mb-3">

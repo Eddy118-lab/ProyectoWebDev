@@ -18,7 +18,7 @@ const FriendRequests = () => {
             try {
                 const response = await axios.get('http://localhost:5000/feed/all', authHeader);
                 setUsers(response.data);
-                console.log('Usuarios cargados:', response.data); // Agregado
+                console.log('Usuarios cargados:', response.data);
             } catch (error) {
                 console.error('Error al cargar usuarios', error);
             }
@@ -33,7 +33,7 @@ const FriendRequests = () => {
                 const response = await axios.get('http://localhost:5000/friends/requests', authHeader);
                 setSentRequests(response.data.sentRequests);
                 setReceivedRequests(response.data.receivedRequests);
-                console.log('Solicitudes de amistad recibidas:', response.data); // Agregado
+                console.log('Solicitudes de amistad recibidas:', response.data);
             } catch (error) {
                 console.error('Error al cargar solicitudes de amistad', error);
             }
@@ -43,9 +43,6 @@ const FriendRequests = () => {
     }, []);
 
     const handleSendRequest = async (targetUserId) => {
-        console.log('ID del usuario autenticado:', token); // Agregado para verificar el token
-        console.log('ID del usuario objetivo:', targetUserId); // Agregado para verificar el ID del usuario objetivo
-
         try {
             await axios.post('http://localhost:5000/friends/send', { targetUserId }, authHeader);
             alert('Solicitud de amistad enviada');
@@ -65,7 +62,7 @@ const FriendRequests = () => {
 
     return (
         <div className="container mt-5">
-            <h2 className="titutlo" style={{ marginTop: '10%' }}>Enviar Solicitudes de Amistad</h2>
+            <h2 className="titulo" style={{ marginTop: '10%' }}>Enviar Solicitudes de Amistad</h2>
             <div className="row">
                 {users.map(user => (
                     <div key={user._id} className="col-md-4 mb-3">
@@ -140,6 +137,7 @@ const FriendRequests = () => {
                     </div>
                 ))}
             </div>
+
         </div>
     );
 };

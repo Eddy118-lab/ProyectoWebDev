@@ -1,4 +1,5 @@
 const UserModel = require('../models/userModel');
+const FriendModel = require('../models/friendModel');
 
 // Controlador para obtener la información del usuario logueado
 const getUserInfo = async (req, res) => {
@@ -95,16 +96,32 @@ const updateProfilePicture = async (req, res) => {
     }
 };
 
-// Controlador para obtener todos los usuarios excepto el usuario logueado
+// Controlador para obtener todos los usuarios excepto el usuario logueado y los amigos actuales
 const getAllUsersExceptLoggedIn = async (req, res) => {
     try {
-        console.log('Obteniendo lista de todos los usuarios, excepto el usuario logueado...');
+        console.log('Obteniendo lista de todos los usuarios, excepto el usuario logueado y sus amigos...');
 
         // Obtenemos el ID del usuario logueado
         const loggedInUserId = req.user._id;
 
-        // Buscamos todos los usuarios excepto el usuario logueado
-        const users = await UserModel.find({ _id: { $ne: loggedInUserId } })
+        // Obtener IDs de amigos con los que tiene relación "accepted"
+        const friends = await FriendModel.find({
+            $or: [
+                { user1Id: loggedInUserId, status: 'accepted' },
+                { user2Id: loggedInUserId, status: 'accepted' }
+            ]
+        }).lean();
+
+        // Extraer IDs de amigos del resultado
+        const friendIds = friends.map(friend =>
+            friend.user1Id.toString() === loggedInUserId.toString() ? friend.user2Id : friend.user1Id
+        );
+
+        // Incluir el usuario logueado en la lista de exclusión
+        friendIds.push(loggedInUserId);
+
+        // Buscar todos los usuarios excepto el logueado y sus amigos
+        const users = await UserModel.find({ _id: { $nin: friendIds } })
             .select('-contrasena') // Excluir campo de contraseña por seguridad
             .lean();
 
@@ -116,10 +133,45 @@ const getAllUsersExceptLoggedIn = async (req, res) => {
     }
 };
 
+// Controlador para obtener solo los perfiles que son amigos del usuario logueado
+const getFriendsProfiles = async (req, res) => {
+    try {
+        console.log('Obteniendo lista de perfiles amigos del usuario logueado...');
+
+        // Obtenemos el ID del usuario logueado
+        const loggedInUserId = req.user._id;
+
+        // Obtener IDs de los amigos con los que tiene una relación "accepted"
+        const friends = await FriendModel.find({
+            $or: [
+                { user1Id: loggedInUserId, status: 'accepted' },
+                { user2Id: loggedInUserId, status: 'accepted' }
+            ]
+        }).lean();
+
+        // Extraer IDs de los amigos del resultado
+        const friendIds = friends.map(friend =>
+            friend.user1Id.toString() === loggedInUserId.toString() ? friend.user2Id : friend.user1Id
+        );
+
+        // Buscar los perfiles de amigos usando sus IDs
+        const friendProfiles = await UserModel.find({ _id: { $in: friendIds } })
+            .select('-contrasena') // Excluir campo de contraseña por seguridad
+            .lean();
+
+        console.log('Perfiles de amigos obtenidos:', friendProfiles);
+        res.json(friendProfiles);
+    } catch (error) {
+        console.error('Error al obtener la lista de perfiles de amigos:', error);
+        res.status(500).json({ message: 'Error al obtener la lista de perfiles de amigos.' });
+    }
+};
+
 module.exports = {
     getUserInfo,
     updateUser,
     deleteUser,
     updateProfilePicture,
-    getAllUsersExceptLoggedIn, // Exportar el nuevo controlador
+    getAllUsersExceptLoggedIn,
+    getFriendsProfiles, 
 };

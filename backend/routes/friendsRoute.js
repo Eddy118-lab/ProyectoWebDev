@@ -10,5 +10,7 @@ router.post('/respond', authMiddleware, friendController.respondToFriendRequest)
 
 router.get('/requests', authMiddleware, friendController.getFriendRequests);
 
+router.post('/delete', authMiddleware, friendController.DeleteFriend);
+
 module.exports = router;
 
