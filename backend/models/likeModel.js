@@ -1,20 +1,22 @@
 const mongoose = require('mongoose');
 
-// Definición del esquema para el modelo de like
+// Definición del esquema para el modelo de "Like"
 const likeSchema = new mongoose.Schema({
-    userId: {
+    post_id: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User', // Referencia al usuario que dio el like
-        required: true, // No puede ser nulo
+        ref: 'Post', // Relación con el modelo de Post
+        required: true
     },
-    postId: {
+    user_id: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Post', // Referencia al post al que se le dio el like
-        required: true, // No puede ser nulo
+        ref: 'User', // Relación con el modelo de Usuario
+        required: true
     },
 });
 
-// Exportar el modelo
+// Crear un índice compuesto para evitar que un usuario dé "like" a la misma publicación más de una vez
+likeSchema.index({ post_id: 1, user_id: 1 }, { unique: true });
+
 const LikeModel = mongoose.model('Like', likeSchema);
 
 module.exports = LikeModel;

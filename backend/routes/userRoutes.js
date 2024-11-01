@@ -9,5 +9,6 @@ router.get('/user/info', authMiddleware, userController.getUserInfo);
 router.put('/user/update', authMiddleware, userController.updateUser);
 router.delete('/user/delete', authMiddleware, userController.deleteUser);
 router.put('/user/update/profile-picture', authMiddleware, uploadsUsers.single('fotoPerfil'), userController.updateProfilePicture); // Nueva ruta
+router.get('/all', authMiddleware, userController.getAllUsersExceptLoggedIn);
 
 module.exports = router;

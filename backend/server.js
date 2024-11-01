@@ -7,6 +7,7 @@ const loginRoute = require('./routes/loginRoute');
 const userRoute = require('./routes/userRoutes');
 const postRoute = require('./routes/postRoutes');
 const messageRoutes = require('./routes/messageRoute');
+const friendRoutes = require('./routes/friendsRoute');
 
 const app = express();
 
@@ -28,6 +29,8 @@ app.use('/feed', userRoute);
 app.use('/post', postRoute);
 
 app.use('/messages', messageRoutes);
+
+app.use('/friends', friendRoutes);
 
 
 const PORT = process.env.PORT || 5000;

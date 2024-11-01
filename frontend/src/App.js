@@ -5,9 +5,9 @@ import LoginFormComponent from './components/LoginFormComponent';
 import Home from './components/home';
 import PerfilComponent from './components/PerfilComponent';
 import PostComponent from './components/PostComponent';
-import FriendsComponent from './components/friends';
 import Header from './components/Header';
 import Inbox from './components/inbox';
+import FriendRequests from './components/FriendRequests';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -41,7 +41,7 @@ function App() {
             <Route path="/home" element={<Home />} />
             <Route path="/profile/user/info" element={<PerfilComponent />} />
             <Route path="/post/user" element={<PostComponent />} />
-            <Route path="/amigos" element={<FriendsComponent />} />
+            <Route path="/amigos" element={<FriendRequests />} />
             <Route path="/chat" element={<Inbox />} />
           </>
         ) : (

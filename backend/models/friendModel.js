@@ -12,6 +12,13 @@ const friendSchema = new mongoose.Schema({
         ref: 'User', // Referencia al otro usuario en la relación de amistad
         required: true, // No puede ser nulo
     },
+    status: {
+        type: String,
+        enum: ['pending', 'accepted', 'rejected'],
+        default: 'pending' // Estado inicial es 'pendiente'
+    }
+}, {
+    timestamps: true // Opcional, si deseas agregar marcas de tiempo para creado y actualizado
 });
 
 // Exportar el modelo

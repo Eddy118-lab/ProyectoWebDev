@@ -7,6 +7,7 @@ const Home = () => {
     const [showLikedPosts, setShowLikedPosts] = useState(false);
     const [showSavedPosts, setShowSavedPosts] = useState(false);
 
+    // Función para obtener las publicaciones desde el servidor
     const fetchPosts = async () => {
         try {
             const response = await axios.get('http://localhost:5000/post/feed', {
@@ -29,6 +30,7 @@ const Home = () => {
         fetchPosts();
     }, []);
 
+    // Actualizar el estado de like en el servidor
     const updateLikeOnServer = async (postId, liked) => {
         try {
             await axios.post(`http://localhost:5000/post/${postId}/like`, { liked }, {
@@ -41,6 +43,7 @@ const Home = () => {
         }
     };
 
+    // Actualizar el estado de guardado en el servidor
     const updateSaveOnServer = async (postId, saved) => {
         try {
             await axios.post(`http://localhost:5000/post/${postId}/save`, { saved }, {
@@ -53,6 +56,7 @@ const Home = () => {
         }
     };
 
+    // Manejar el like en una publicación
     const handleLike = async (postId) => {
         const updatedPosts = posts.map(post => {
             if (post._id === postId) {
@@ -68,6 +72,7 @@ const Home = () => {
         await updateLikeOnServer(postId, liked);
     };
 
+    // Manejar el guardado en una publicación
     const handleSave = async (postId) => {
         const updatedPosts = posts.map(post => {
             if (post._id === postId) {
@@ -81,11 +86,14 @@ const Home = () => {
         await updateSaveOnServer(postId, saved);
     };
 
+    // Filtrar publicaciones que tienen like o están guardadas
     const likedPosts = posts.filter(post => post.liked);
     const savedPosts = posts.filter(post => post.saved);
 
+    // Seleccionar las publicaciones a mostrar en base a los filtros
     const displayedPosts = showLikedPosts ? likedPosts : showSavedPosts ? savedPosts : posts;
 
+    // Manejar el retorno a todas las publicaciones
     const handleGoHome = () => {
         setShowLikedPosts(false);
         setShowSavedPosts(false);
@@ -96,14 +104,14 @@ const Home = () => {
             <Header
                 onLikeClick={() => setShowLikedPosts(prev => !prev)}
                 onSaveClick={() => setShowSavedPosts(prev => !prev)}
-                onHomeClick={handleGoHome} // Añadir esta línea
+                onHomeClick={handleGoHome}
             />
             <div className="container mt-5 pt-5">
                 <h2 className="my-4 text-center" style={{ color: '#343a40' }}>
                     {showLikedPosts ? 'Publicaciones a las que diste Like' : showSavedPosts ? 'Publicaciones Guardadas' : 'Publicaciones de otros usuarios'}
                 </h2>
 
-                {posts.length > 0 ? (
+                {displayedPosts.length > 0 ? (
                     <div className="row justify-content-center">
                         {displayedPosts.map(post => (
                             <div key={post._id} className="col-md-8 mb-4">

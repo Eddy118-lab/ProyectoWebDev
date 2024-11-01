@@ -95,9 +95,31 @@ const updateProfilePicture = async (req, res) => {
     }
 };
 
+// Controlador para obtener todos los usuarios excepto el usuario logueado
+const getAllUsersExceptLoggedIn = async (req, res) => {
+    try {
+        console.log('Obteniendo lista de todos los usuarios, excepto el usuario logueado...');
+
+        // Obtenemos el ID del usuario logueado
+        const loggedInUserId = req.user._id;
+
+        // Buscamos todos los usuarios excepto el usuario logueado
+        const users = await UserModel.find({ _id: { $ne: loggedInUserId } })
+            .select('-contrasena') // Excluir campo de contraseña por seguridad
+            .lean();
+
+        console.log('Usuarios obtenidos:', users);
+        res.json(users);
+    } catch (error) {
+        console.error('Error al obtener la lista de usuarios:', error);
+        res.status(500).json({ message: 'Error al obtener la lista de usuarios.' });
+    }
+};
+
 module.exports = {
     getUserInfo,
     updateUser,
     deleteUser,
-    updateProfilePicture, // Exportar nueva función
+    updateProfilePicture,
+    getAllUsersExceptLoggedIn, // Exportar el nuevo controlador
 };
