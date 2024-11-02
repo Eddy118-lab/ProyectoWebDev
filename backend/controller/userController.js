@@ -1,5 +1,8 @@
 const UserModel = require('../models/userModel');
 const FriendModel = require('../models/friendModel');
+const MessageModel = require('../models/messageModel');
+const CommentModel = require('../models/commentModel');
+const PostModel = require('../models/postModel');
 
 // Controlador para obtener la información del usuario logueado
 const getUserInfo = async (req, res) => {
@@ -51,24 +54,32 @@ const updateUser = async (req, res) => {
     }
 };
 
-// Controlador para eliminar la cuenta del usuario
 const deleteUser = async (req, res) => {
     try {
-        console.log('Eliminando cuenta del usuario...'); // Log de inicio
-        const deletedUser = await UserModel.findByIdAndDelete(req.user._id);
+        const userId = req.params.id; // Obtener el ID del usuario a eliminar
 
-        if (!deletedUser) {
-            console.log('Usuario no encontrado al eliminar.');
-            return res.status(404).json({ message: 'Usuario no encontrado.' });
-        }
+        // 1. Eliminar publicaciones del usuario
+        await PostModel.deleteMany({ user_id: userId });
 
-        console.log('Cuenta eliminada exitosamente.'); // Log de éxito
-        res.json({ message: 'Cuenta eliminada exitosamente.' });
+        // 2. Eliminar comentarios del usuario
+        await CommentModel.deleteMany({ user_id: userId });
+
+        // 3. Eliminar mensajes del usuario
+        await MessageModel.deleteMany({ sender_id: userId }); // Suponiendo que el usuario puede ser un remitente
+
+        // 4. (Opcional) Eliminar amigos o relaciones si es necesario
+        await FriendModel.deleteMany({ $or: [{ user1Id: userId }, { user2Id: userId }] });
+
+        // 5. Finalmente, eliminar el usuario
+        await UserModel.findByIdAndDelete(userId);
+
+        res.json({ message: 'Usuario y sus documentos relacionados eliminados correctamente.' });
     } catch (error) {
-        console.error('Error al eliminar la cuenta del usuario:', error);
-        res.status(500).json({ message: 'Error al eliminar la cuenta del usuario.' });
+        console.error('Error al eliminar el usuario:', error);
+        res.status(500).json({ message: 'Error al eliminar el usuario.' });
     }
 };
+
 
 const updateProfilePicture = async (req, res) => {
     try {

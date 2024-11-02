@@ -92,48 +92,6 @@ const PostComponent = () => {
                     </Form>
                 </Card.Body>
             </Card>
-
-            {/* Lista de publicaciones */}
-            <div>
-                {userPosts && userPosts.length > 0 ? (
-                    userPosts.map((post) => (
-                        <Card key={post.id} className="mb-3 shadow-sm">
-                            <Card.Body>
-                                <Row>
-                                    <Col xs={2}>
-                                        <img 
-                                            src={post.user_id.fotoPerfil || 'default-profile.png'} 
-                                            alt="Perfil" 
-                                            className="rounded-circle" 
-                                            style={{ width: '40px', height: '40px' }} 
-                                        />
-                                    </Col>
-                                    <Col>
-                                        <Card.Text className="fw-bold mb-1">{post.user_id.nombreUsuario}</Card.Text>
-                                        <Card.Text>{post.contenido}</Card.Text>
-                                        {post.imagen_url && (
-                                            <Card.Img 
-                                                src={post.imagen_url} 
-                                                alt="Imagen de publicación" 
-                                                style={{ borderRadius: '10px', height: 'auto', maxHeight: '400px', objectFit: 'cover' }} 
-                                            />
-                                        )}
-                                    </Col>
-                                </Row>
-                                <div className="d-flex justify-content-between mt-2">
-                                    <span>
-                                        <FaRegHeart className="me-2" style={{ cursor: 'pointer' }} />
-                                        <FaRegComment className="me-2" style={{ cursor: 'pointer' }} />
-                                        <FaShare style={{ cursor: 'pointer' }} />
-                                    </span>
-                                </div>
-                            </Card.Body>
-                        </Card>
-                    ))
-                ) : (
-                    <p className="text-muted text-center">No hay publicaciones para mostrar.</p>
-                )}
-            </div>
         </Container>
     );
 };

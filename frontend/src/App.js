@@ -9,6 +9,7 @@ import Header from './components/Header';
 import Inbox from './components/inbox';
 import FriendRequests from './components/FriendRequests';
 import FriendList from './components/FriendList';
+import PostEdit from './components/PostEdit';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -42,6 +43,7 @@ function App() {
             <Route path="/home" element={<Home />} />
             <Route path="/profile/user/info" element={<PerfilComponent />} />
             <Route path="/post/user" element={<PostComponent />} />
+            <Route path="/profile/user/edit/:id" element={<PostEdit />} />
             <Route path="/amigos" element={<FriendRequests />} />
             <Route path="/chat" element={<Inbox />} />
             <Route path="/list/friends" element={<FriendList />} />
