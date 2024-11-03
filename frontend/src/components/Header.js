@@ -27,7 +27,6 @@ const Header = ({ onLikeClick, onSaveClick }) => {
     const handleProfileClick = () => navigate('/profile/user/info');
     const handleCreateClick = () => navigate('/post/user');
     const handleFriendsClick = () => navigate('/amigos');
-    const handleListClick = () => navigate('/list/friends');
     const handleChatClick = () => navigate('/chat');
     const handleLikedClick = () => navigate('/liked');
     const handleSavedClick = () => navigate('/saved');
@@ -56,9 +55,6 @@ const Header = ({ onLikeClick, onSaveClick }) => {
                     </button>
                     <button className="btn text-dark" onClick={handleFriendsClick}>
                         <i className="fas fa-users"></i>
-                    </button>
-                    <button className="btn text-dark" onClick={handleListClick}>
-                        <i className="fas fa-list"></i>
                     </button>
                     <button className="btn text-dark" onClick={handleChatClick}>
                         <i className="fas fa-comments"></i>

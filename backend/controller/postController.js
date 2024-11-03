@@ -81,32 +81,41 @@ const getFriendsPosts = async (req, res) => {
 // Actualizar un post específico
 const updatePost = async (req, res) => {
     try {
-        const { id } = req.params;
-        const { contenido } = req.body; // No se requiere imagen_url para actualizar
-        const post = await PostModel.findById(id);
+        const postId = req.params.id; // Asegúrate de que esto está correctamente configurado
+        console.log('ID recibido en backend:', postId); // Verifica el ID recibido
 
-        // Verificar permisos
-        if (post.user_id.toString() !== req.user.id) {
-            return res.status(403).json({ error: 'No tienes permisos para actualizar este post' });
-        }
+        const { contenido } = req.body;
+        let { imagen_url } = req.body;
 
-        // Actualizar contenido y manejar nueva imagen si existe
-        post.contenido = contenido || post.contenido;
-
+        // Verifica si el archivo de imagen fue proporcionado
         if (req.file) {
-            const result = await cloudinary.uploader.upload(req.file.path, {
-                folder: 'posts',
-            });
-            post.imagen_url = result.secure_url; // Actualiza la URL de la imagen
+            imagen_url = req.file.path; // Asume que `req.file.path` contiene la URL de Cloudinary
         }
 
-        await post.save();
-        res.status(200).json({ message: 'Post actualizado exitosamente', post });
+        // Validar si al menos un campo fue proporcionado
+        if (!contenido && !imagen_url) {
+            return res.status(400).json({ message: 'No se proporcionó ningún campo para actualizar.' });
+        }
+
+        // Construir un objeto de actualización solo con los campos proporcionados
+        const updateData = {};
+        if (contenido) updateData.contenido = contenido;
+        if (imagen_url) updateData.imagen_url = imagen_url;
+
+        // Actualizar el post
+        const updatedPost = await PostModel.findByIdAndUpdate(postId, updateData, { new: true });
+
+        if (!updatedPost) {
+            return res.status(404).json({ message: 'Publicación no encontrada.' });
+        }
+
+        res.json({ message: 'Publicación actualizada exitosamente.', post: updatedPost });
     } catch (error) {
-        console.error('Error al actualizar el post:', error);
-        res.status(500).json({ error: 'Error al actualizar el post' });
+        console.error('Error al actualizar la publicación:', error);
+        res.status(500).json({ message: 'Error al actualizar la publicación.' });
     }
 };
+
 
 // Eliminar un post específico
 const deletePost = async (req, res) => {

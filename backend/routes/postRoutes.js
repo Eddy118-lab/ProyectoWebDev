@@ -8,6 +8,6 @@ router.post('/create', authMiddleware, uploadsPost.single('imagen_url'), postCon
 router.get('/user', authMiddleware, postController.getUserPosts);
 router.get('/feed', authMiddleware, postController.getFriendsPosts);
 router.put('/update/:id', authMiddleware, uploadsPost.single('imagen_url'), postController.updatePost);
-router.delete('/delete/:id', authMiddleware, postController.deletePost);
+router.delete('/delete', authMiddleware, postController.deletePost);
 
 module.exports = router;
