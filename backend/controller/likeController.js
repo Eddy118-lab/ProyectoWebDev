@@ -43,15 +43,18 @@ const likeController = {
         try {
             console.log(`Intentando quitar like: usuario ${user_id}, post ${post_id}`);
 
+            // Buscar el like existente
             const like = await LikeModel.findOne({ post_id, user_id });
             if (!like) {
                 console.log('No se encontró un like existente para este post y usuario.');
                 return res.status(400).json({ message: 'No has dado like a esta publicación.' });
             }
 
+            console.log('Like encontrado, procediendo a eliminarlo:', like);
             await like.deleteOne();
             console.log('Like eliminado de la base de datos.');
 
+            // Decrementar el contador de likes en el post
             await PostModel.findByIdAndUpdate(post_id, { $inc: { likeCount: -1 } });
             console.log(`Contador de likes decrementado para el post ${post_id}`);
 
@@ -61,6 +64,7 @@ const likeController = {
             res.status(500).json({ message: 'Error al eliminar el like.' });
         }
     },
+
 
     // Función para obtener información de los likes de un post
     getLikesInfo: async (req, res) => {

@@ -7,8 +7,8 @@ const Home = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    // Function to fetch posts from the server
-    const fetchPosts = async () => {
+     // Obtener las publicaciones con el estado "liked" desde la base de datos
+     const fetchPosts = async () => {
         setLoading(true);
         try {
             const response = await axios.get('http://localhost:5000/post/feed', {
@@ -16,14 +16,14 @@ const Home = () => {
                     Authorization: `Bearer ${localStorage.getItem('token')}`,
                 },
             });
+            console.log(response.data);
             const updatedPosts = response.data.map(post => ({
                 ...post,
-                liked: post.liked || false,
+                liked: post.liked || false, // `liked` indica si el usuario ya ha dado "like"
                 likeUsers: post.likeUsers || [],
                 likes: post.likes || 0
             }));
             setPosts(updatedPosts);
-            console.log("Publicaciones obtenidas:", updatedPosts);
         } catch (error) {
             console.error('Error al obtener las publicaciones:', error);
             setError("Error al cargar las publicaciones.");
@@ -32,13 +32,39 @@ const Home = () => {
         }
     };
 
-    const handleLike = async (postId) => {
-       //////
+    // Alternar el "like" en el frontend y sincronizar con la BD
+    const handleLike = async (postId, alreadyLiked) => {
+        try {
+            if (!alreadyLiked) {
+                await axios.post(`http://localhost:5000/likes/add`, { post_id: postId }, {
+                    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+                });
+                // Actualiza el estado localmente
+                setPosts(prevPosts => 
+                    prevPosts.map(post => 
+                        post._id === postId ? { ...post, liked: true, likes: post.likes + 1 } : post
+                    )
+                );
+            } else {
+                await axios.post(`http://localhost:5000/likes/remove`, { post_id: postId }, {
+                    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+                });
+                // Actualiza el estado localmente
+                setPosts(prevPosts => 
+                    prevPosts.map(post => 
+                        post._id === postId ? { ...post, liked: false, likes: post.likes - 1 } : post
+                    )
+                );
+            }
+        } catch (error) {
+            console.error("Error al actualizar el like:", error);
+            setError("Hubo un problema al actualizar el like.");
+        }
     };
 
-    const fetchLikesInfo = async (postId) => {
-        // Fetch likes info logic...
-    };
+    useEffect(() => {
+        fetchPosts();
+    }, []);
 
     const renderLikeText = (likeUsers) => {
         if (!likeUsers || likeUsers.length === 0) {
@@ -70,6 +96,7 @@ const Home = () => {
                     <div className="row justify-content-center">
                         {posts.map(post => (
                             <div key={post._id} className="col-md-8 mb-4">
+
                                 <div className="card shadow-sm border-0" style={{ maxHeight: '600px' }}>
                                     <div className="card-header d-flex align-items-center">
                                         <img
@@ -96,7 +123,7 @@ const Home = () => {
                                             <span>
                                                 <i
                                                     className={`fa${post.liked ? 's' : 'r'} fa-heart me-2 text-danger`}
-                                                    onClick={() => handleLike(post._id)}
+                                                    onClick={() => handleLike(post._id, post.liked)}
                                                     style={{ cursor: 'pointer' }}
                                                 ></i>
                                                 {post.likes} Me gusta
