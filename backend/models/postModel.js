@@ -10,6 +10,10 @@ const postSchema = new mongoose.Schema({
         type: String,
         default: null, // Puede ser nulo
     },
+    likeCount: { 
+        type: Number, 
+        default: 0 
+    },
     user_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User', // Hace referencia al modelo User

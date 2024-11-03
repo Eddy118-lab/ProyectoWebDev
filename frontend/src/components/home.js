@@ -4,11 +4,12 @@ import Header from './Header';
 
 const Home = () => {
     const [posts, setPosts] = useState([]);
-    const [showLikedPosts, setShowLikedPosts] = useState(false);
-    const [showSavedPosts, setShowSavedPosts] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
 
-    // Función para obtener las publicaciones desde el servidor
+    // Function to fetch posts from the server
     const fetchPosts = async () => {
+        setLoading(true);
         try {
             const response = await axios.get('http://localhost:5000/post/feed', {
                 headers: {
@@ -18,102 +19,56 @@ const Home = () => {
             const updatedPosts = response.data.map(post => ({
                 ...post,
                 liked: post.liked || false,
-                saved: post.saved || false,
+                likeUsers: post.likeUsers || [],
+                likes: post.likes || 0
             }));
             setPosts(updatedPosts);
+            console.log("Publicaciones obtenidas:", updatedPosts);
         } catch (error) {
             console.error('Error al obtener las publicaciones:', error);
+            setError("Error al cargar las publicaciones.");
+        } finally {
+            setLoading(false);
         }
+    };
+
+    const handleLike = async (postId) => {
+       //////
+    };
+
+    const fetchLikesInfo = async (postId) => {
+        // Fetch likes info logic...
+    };
+
+    const renderLikeText = (likeUsers) => {
+        if (!likeUsers || likeUsers.length === 0) {
+            return "No hay me gusta todavía";
+        }
+        if (likeUsers.length === 1) {
+            return `${likeUsers[0]} dio me gusta`;
+        }
+        if (likeUsers.length === 2) {
+            return `${likeUsers[0]} y ${likeUsers[1]} dieron me gusta`;
+        }
+        return `${likeUsers[0]}, ${likeUsers[1]} y otros dieron me gusta`;
     };
 
     useEffect(() => {
         fetchPosts();
     }, []);
 
-    // Actualizar el estado de like en el servidor
-    const updateLikeOnServer = async (postId, liked) => {
-        try {
-            await axios.post(`http://localhost:5000/post/${postId}/like`, { liked }, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('token')}`,
-                },
-            });
-        } catch (error) {
-            console.error('Error al actualizar el like:', error);
-        }
-    };
-
-    // Actualizar el estado de guardado en el servidor
-    const updateSaveOnServer = async (postId, saved) => {
-        try {
-            await axios.post(`http://localhost:5000/post/${postId}/save`, { saved }, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('token')}`,
-                },
-            });
-        } catch (error) {
-            console.error('Error al actualizar el guardado:', error);
-        }
-    };
-
-    // Manejar el like en una publicación
-    const handleLike = async (postId) => {
-        const updatedPosts = posts.map(post => {
-            if (post._id === postId) {
-                const newLikedStatus = !post.liked;
-                const newLikesCount = newLikedStatus ? post.likes + 1 : post.likes - 1;
-                return { ...post, liked: newLikedStatus, likes: newLikesCount };
-            }
-            return post;
-        });
-        setPosts(updatedPosts);
-
-        const liked = updatedPosts.find(post => post._id === postId).liked;
-        await updateLikeOnServer(postId, liked);
-    };
-
-    // Manejar el guardado en una publicación
-    const handleSave = async (postId) => {
-        const updatedPosts = posts.map(post => {
-            if (post._id === postId) {
-                return { ...post, saved: !post.saved };
-            }
-            return post;
-        });
-        setPosts(updatedPosts);
-
-        const saved = updatedPosts.find(post => post._id === postId).saved;
-        await updateSaveOnServer(postId, saved);
-    };
-
-    // Filtrar publicaciones que tienen like o están guardadas
-    const likedPosts = posts.filter(post => post.liked);
-    const savedPosts = posts.filter(post => post.saved);
-
-    // Seleccionar las publicaciones a mostrar en base a los filtros
-    const displayedPosts = showLikedPosts ? likedPosts : showSavedPosts ? savedPosts : posts;
-
-    // Manejar el retorno a todas las publicaciones
-    const handleGoHome = () => {
-        setShowLikedPosts(false);
-        setShowSavedPosts(false);
-    };
-
     return (
         <div>
-            <Header
-                onLikeClick={() => setShowLikedPosts(prev => !prev)}
-                onSaveClick={() => setShowSavedPosts(prev => !prev)}
-                onHomeClick={handleGoHome}
-            />
+            <Header />
             <div className="container mt-5 pt-5">
                 <h2 className="my-4 text-center" style={{ color: '#343a40' }}>
-                    {showLikedPosts ? 'Publicaciones a las que diste Like' : showSavedPosts ? 'Publicaciones Guardadas' : 'Publicaciones de otros usuarios'}
+                    Publicaciones de tus amigos
                 </h2>
-
-                {displayedPosts.length > 0 ? (
+                {loading ? (
+                    <p className="text-muted text-center">Cargando publicaciones...</p>
+                ) : posts.length > 0 ? (
                     <div className="row justify-content-center">
-                        {displayedPosts.map(post => (
+                        {posts.map(post => (
                             <div key={post._id} className="col-md-8 mb-4">
                                 <div className="card shadow-sm border-0" style={{ maxHeight: '600px' }}>
                                     <div className="card-header d-flex align-items-center">
@@ -137,7 +92,7 @@ const Home = () => {
                                         <p className="card-text" style={{ maxHeight: '100px', overflow: 'hidden' }}>
                                             {post.contenido}
                                         </p>
-                                        <div className="d-flex justify-content-between">
+                                        <div className="d-flex justify-content-between align-items-center">
                                             <span>
                                                 <i
                                                     className={`fa${post.liked ? 's' : 'r'} fa-heart me-2 text-danger`}
@@ -145,14 +100,14 @@ const Home = () => {
                                                     style={{ cursor: 'pointer' }}
                                                 ></i>
                                                 {post.likes} Me gusta
+                                            </span>
+                                            <span className="text-muted ms-2">
+                                                {renderLikeText(post.likeUsers)}
+                                            </span>
+                                            <span>
                                                 <i className="far fa-comment me-2 ms-3" style={{ cursor: 'pointer' }}></i>
                                                 <i className="far fa-paper-plane" style={{ cursor: 'pointer' }}></i>
                                             </span>
-                                            <i
-                                                className={`fa${post.saved ? 's' : 'r'} fa-bookmark`}
-                                                onClick={() => handleSave(post._id)}
-                                                style={{ cursor: 'pointer' }}
-                                            ></i>
                                         </div>
                                     </div>
                                 </div>

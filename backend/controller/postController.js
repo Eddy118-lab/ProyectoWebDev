@@ -1,5 +1,6 @@
 const PostModel = require('../models/postModel');
 const FriendModel = require('../models/friendModel');
+const LikeModel = require('../models/likeModel')
 const cloudinary = require('../config/cloudinaryConfig');
 
 // Crear un nuevo post
@@ -44,13 +45,13 @@ const getUserPosts = async (req, res) => {
     }
 };
 
-// Controlador para obtener publicaciones de amigos
 const getFriendsPosts = async (req, res) => {
     try {
         console.log('Obteniendo publicaciones de amigos...');
 
         // Obtener el ID del usuario logueado
         const loggedInUserId = req.user._id;
+        console.log('ID del usuario logueado:', loggedInUserId);
 
         // Obtener IDs de amigos
         const friends = await FriendModel.find({
@@ -60,16 +61,50 @@ const getFriendsPosts = async (req, res) => {
             ]
         }).lean();
 
+        console.log('Amigos encontrados:', friends);
+
         const friendIds = friends.map(friend =>
             friend.user1Id.toString() === loggedInUserId.toString() ? friend.user2Id : friend.user1Id
         );
+
+        console.log('IDs de amigos:', friendIds);
 
         // Obtener publicaciones de amigos
         const friendPosts = await PostModel.find({ user_id: { $in: friendIds } })
             .populate('user_id', '-contrasena') // Excluir contraseña del usuario
             .lean();
 
-        console.log('Publicaciones de amigos obtenidas:', friendPosts);
+        console.log('Publicaciones de amigos encontradas:', friendPosts);
+
+        // Obtener likes para todas las publicaciones de amigos en una sola consulta
+        const postIds = friendPosts.map(post => post._id);
+        console.log('IDs de publicaciones:', postIds);
+
+        const likes = await LikeModel.find({ post_id: { $in: postIds } })
+            .populate('user_id', 'nombreUsuario')
+            .lean();
+
+        console.log('Likes encontrados:', likes);
+
+        // Agrupar likes por post
+        const likesByPostId = likes.reduce((acc, like) => {
+            const postId = like.post_id.toString();
+            if (!acc[postId]) {
+                acc[postId] = [];
+            }
+            acc[postId].push(like.user_id.nombreUsuario);
+            return acc;
+        }, {});
+
+        console.log('Likes agrupados por publicación:', likesByPostId);
+
+        // Agregar los likes a cada publicación
+        for (const post of friendPosts) {
+            post.likes = likesByPostId[post._id.toString()] ? likesByPostId[post._id.toString()].length : 0; // Total de likes
+            post.likeUsers = likesByPostId[post._id.toString()] || []; // Obtener el nombre de usuario de cada like
+        }
+
+        console.log('Publicaciones de amigos con likes agregados:', friendPosts);
         res.json(friendPosts);
     } catch (error) {
         console.error('Error al obtener publicaciones de amigos:', error);
