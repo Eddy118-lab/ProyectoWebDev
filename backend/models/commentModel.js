@@ -1,24 +1,22 @@
 const mongoose = require('mongoose');
 
-// Definición del esquema para el modelo de comentario
 const commentSchema = new mongoose.Schema({
     content: {
         type: String,
-        required: true, // No puede ser nulo
+        required: true,
     },
     userId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User', // Referencia al usuario que hizo el comentario
-        required: true, // No puede ser nulo
+        ref: 'User',
+        required: true,
     },
     postId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Post', // Referencia al post al que pertenece el comentario
-        required: true, // No puede ser nulo
+        ref: 'Post',
+        required: true,
     },
-});
+}, { timestamps: true }); // Agregar timestamps para saber cuándo fue creado y actualizado
 
-// Exportar el modelo
 const CommentModel = mongoose.model('Comment', commentSchema);
 
 module.exports = CommentModel;

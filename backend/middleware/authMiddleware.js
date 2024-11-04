@@ -18,6 +18,7 @@ const authMiddleware = async (req, res, next) => {
         console.log('Token verificado:', verified);
 
         req.user = await UserModel.findById(verified.id);
+        req.userId = verified.id; // Establecer userId en req
 
         if (!req.user || !req.user.verificacion) {
             console.log('Acceso denegado: El usuario no está verificado.');

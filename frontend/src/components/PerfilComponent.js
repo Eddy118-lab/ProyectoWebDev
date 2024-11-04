@@ -21,6 +21,11 @@ const PerfilComponent = () => {
     //////ayuda al modal  de amigos
     const [users, setUsers] = useState([]); // Estado para almacenar la lista de amigos
     const [showModal, setShowModal] = useState(false); // Estado para controlar la visibilidad del modal
+
+    // Estado para el modal de imagen ampliada
+    const [showImageModal, setShowImageModal] = useState(false);
+    const [currentImage, setCurrentImage] = useState('');
+
     const token = localStorage.getItem('token');
     const authHeader = {
         headers: {
@@ -29,7 +34,6 @@ const PerfilComponent = () => {
     };
     //////////////
 
-
     const handleFileChange = (e) => {
         setFile(e.target.files[0]);
         handleUpload(e.target.files[0]);
@@ -37,6 +41,12 @@ const PerfilComponent = () => {
 
     const handlePhotoClick = () => {
         document.getElementById("fileInput").click();
+    };
+
+    // Función para manejar el clic en la imagen para ampliarla
+    const handleImageClick = (imageUrl) => {
+        setCurrentImage(imageUrl);
+        setShowImageModal(true);
     };
 
     useEffect(() => {
@@ -127,7 +137,6 @@ const PerfilComponent = () => {
         }
     };
 
-
     /////// ayuda modal de amigos
     // Función para obtener la lista de amigos
     useEffect(() => {
@@ -164,8 +173,41 @@ const PerfilComponent = () => {
     const handleShowModal = () => setShowModal(true);
     ///////
 
+    // Función para cerrar el modal de imagen
+    const handleCloseImageModal = () => setShowImageModal(false);
 
 
+    const handleDeletePost = async (postId) => {
+        console.log("Intentando eliminar la publicación con ID:", postId);
+        
+        const confirmDelete = window.confirm("¿Estás seguro de que deseas eliminar esta publicación?");
+        if (confirmDelete) {
+            try {
+                const token = localStorage.getItem('token'); 
+                console.log("Token obtenido:", token);
+    
+                const response = await axios.delete('http://localhost:5000/post/delete', {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                    data: { id: postId } 
+                });
+    
+                console.log("Respuesta de eliminación:", response);
+    
+                setUserPosts((prevPosts) => prevPosts.filter((post) => post._id !== postId));
+                console.log("Publicación eliminada. Nuevas publicaciones del usuario:", userPosts);
+    
+                alert('Publicación eliminada exitosamente');
+            } catch (error) {
+                console.error('Error al eliminar la publicación:', error);
+                alert('Error al eliminar la publicación');
+            }
+        }
+    };
+    
+    
+    
 
     return (
         <Container className="mt-5">
@@ -208,7 +250,6 @@ const PerfilComponent = () => {
                     </div>
                 </Col>
             </Row>
-
 
             <div>
                 {/* Modal para mostrar la lista de amigos */}
@@ -314,14 +355,19 @@ const PerfilComponent = () => {
                                                 <Dropdown.Item as={Link} to={`/profile/user/edit/${post._id}`}>
                                                     Editar
                                                 </Dropdown.Item>
-                                                <Dropdown.Item onClick={handleDelete}>
+                                                <Dropdown.Item onClick={() => handleDeletePost(post._id)}>
                                                     Borrar
                                                 </Dropdown.Item>
                                             </Dropdown.Menu>
                                         </Dropdown>
                                     </Card.Header>
                                     {post.imagen_url && (
-                                        <Card.Img variant="top" src={post.imagen_url} style={{ height: '300px', objectFit: 'cover' }} />
+                                        <Card.Img
+                                            variant="top"
+                                            src={post.imagen_url}
+                                            style={{ height: '300px', objectFit: 'cover', cursor: 'pointer' }}
+                                            onClick={() => handleImageClick(post.imagen_url)} // Manejar clic en la imagen
+                                        />
                                     )}
                                     <Card.Body>
                                         <Card.Text className="text-muted">
@@ -336,6 +382,21 @@ const PerfilComponent = () => {
                     <p>No tienes publicaciones aún.</p>
                 )}
             </Container>
+
+            {/* Modal para la imagen ampliada */}
+            <Modal show={showImageModal} onHide={handleCloseImageModal} size="lg">
+                <Modal.Header closeButton>
+                    <Modal.Title>Imagen Ampliada</Modal.Title>
+                </Modal.Header>
+                <Modal.Body className="text-center">
+                    <img src={currentImage} alt="Imagen ampliada" className="img-fluid" />
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleCloseImageModal}>
+                        Cerrar
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </Container>
     );
 };

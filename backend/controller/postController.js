@@ -116,29 +116,27 @@ const getFriendsPosts = async (req, res) => {
 // Actualizar un post específico
 const updatePost = async (req, res) => {
     try {
-        const postId = req.params.id; // Asegúrate de que esto está correctamente configurado
-        console.log('ID recibido en backend:', postId); // Verifica el ID recibido
-
+        const userId = req.user.id; // ID del usuario autenticado
         const { contenido } = req.body;
         let { imagen_url } = req.body;
 
-        // Verifica si el archivo de imagen fue proporcionado
+        // Verifica si se proporciona una imagen
         if (req.file) {
-            imagen_url = req.file.path; // Asume que `req.file.path` contiene la URL de Cloudinary
+            const result = await cloudinary.uploader.upload(req.file.path, { folder: 'posts' });
+            imagen_url = result.secure_url; // URL segura de Cloudinary
         }
 
-        // Validar si al menos un campo fue proporcionado
+        // Validar que al menos un campo se proporciona
         if (!contenido && !imagen_url) {
             return res.status(400).json({ message: 'No se proporcionó ningún campo para actualizar.' });
         }
 
-        // Construir un objeto de actualización solo con los campos proporcionados
-        const updateData = {};
-        if (contenido) updateData.contenido = contenido;
-        if (imagen_url) updateData.imagen_url = imagen_url;
-
-        // Actualizar el post
-        const updatedPost = await PostModel.findByIdAndUpdate(postId, updateData, { new: true });
+        // Actualizar la publicación del usuario
+        const updatedPost = await PostModel.findOneAndUpdate(
+            { user_id: userId },
+            { contenido, imagen_url },
+            { new: true }
+        );
 
         if (!updatedPost) {
             return res.status(404).json({ message: 'Publicación no encontrada.' });
@@ -152,24 +150,47 @@ const updatePost = async (req, res) => {
 };
 
 
-// Eliminar un post específico
+
 const deletePost = async (req, res) => {
     try {
-        const { id } = req.params;
-        const post = await PostModel.findById(id);
+        const userId = req.user.id;
+        const { id } = req.body; // Recibimos el ID del post y el ID del usuario
 
-        // Verificar permisos
-        if (post.user_id.toString() !== req.user.id) {
+        if (!id) {
+            console.log('ID de la publicación no proporcionado');
+            return res.status(400).json({ error: 'Se requiere el ID de la publicación para eliminarla' });
+        }
+
+        console.log('ID de la publicación a eliminar:', id); // Verificar el ID recibido
+
+        const post = await PostModel.findById(id);
+        console.log('Resultado de la búsqueda de la publicación:', post); // Log de la publicación encontrada o null
+
+        if (!post) {
+            console.log('Publicación no encontrada');
+            return res.status(404).json({ error: 'Publicación no encontrada' });
+        }
+
+        console.log('Publicación encontrada:', post);
+
+        // Verificar el usuario que intenta eliminar
+        console.log('ID del usuario que intenta eliminar:', userId);
+        console.log('ID del usuario propietario del post:', post.user_id.toString());
+
+        if (post.user_id.toString() !== userId) {
+            console.log('Permiso denegado para el usuario:', userId);
             return res.status(403).json({ error: 'No tienes permisos para eliminar este post' });
         }
 
-        await post.remove();
+        await PostModel.findByIdAndDelete(id);
+        console.log('Publicación eliminada con éxito, ID:', id);
         res.status(200).json({ message: 'Post eliminado exitosamente' });
     } catch (error) {
         console.error('Error al eliminar el post:', error);
         res.status(500).json({ error: 'Error al eliminar el post' });
     }
 };
+
 
 module.exports = {
     createPost,

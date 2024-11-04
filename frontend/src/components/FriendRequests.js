@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 const FriendRequests = () => {
     const [users, setUsers] = useState([]);
@@ -18,7 +19,6 @@ const FriendRequests = () => {
             try {
                 const response = await axios.get('http://localhost:5000/feed/all', authHeader);
                 setUsers(response.data);
-                console.log('Usuarios cargados:', response.data);
             } catch (error) {
                 console.error('Error al cargar usuarios', error);
             }
@@ -33,7 +33,6 @@ const FriendRequests = () => {
                 const response = await axios.get('http://localhost:5000/friends/requests', authHeader);
                 setSentRequests(response.data.sentRequests);
                 setReceivedRequests(response.data.receivedRequests);
-                console.log('Solicitudes de amistad recibidas:', response.data);
             } catch (error) {
                 console.error('Error al cargar solicitudes de amistad', error);
             }
@@ -61,23 +60,41 @@ const FriendRequests = () => {
     };
 
     return (
-        <div className="container mt-5">
-            <h2 className="titulo" style={{ marginTop: '10%' }}>Enviar Solicitudes de Amistad</h2>
-            <div className="row">
+        <div className="container py-5">
+            <h1 className="text-center mb-5" style={{
+                background: 'linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888)',
+                color: 'white',
+                padding: '15px',
+                borderRadius: '10px',
+                boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)',
+                marginTop: '80px',
+            }}>
+                Conecta con Amigos
+            </h1>
+
+            <h2 className="mb-4" style={{ color: '#cc2366' }}>Explorar Usuarios</h2>
+            <div className="row g-4">
                 {users.map(user => (
-                    <div key={user._id} className="col-md-4 mb-3">
-                        <div className="card text-center">
-                            <img
-                                src={user.fotoPerfil}
-                                alt={`${user.nombreUsuario}'s profile`}
-                                className="card-img-top rounded-circle mx-auto mt-3"
-                                style={{ width: '100px', height: '100px', objectFit: 'cover' }}
-                            />
-                            <div className="card-body">
-                                <h5 className="card-title">{user.nombreUsuario}</h5>
+                    <div key={user._id} className="col-md-6 col-lg-4">
+                        <div className="card h-100 shadow-lg border-0 rounded-lg">
+                            <div className="card-img-top text-center py-4">
+                                <img
+                                    src={user.fotoPerfil}
+                                    alt={`${user.nombreUsuario}'s profile`}
+                                    className="rounded-circle"
+                                    style={{ width: '120px', height: '120px', objectFit: 'cover', border: '4px solid #e6683c' }}
+                                />
+                            </div>
+                            <div className="card-body text-center">
+                                <h5 className="card-title" style={{ color: '#bc1888', fontWeight: 'bold' }}>{user.nombreUsuario}</h5>
                                 <button
-                                    className="btn btn-primary"
+                                    className="btn w-100 mt-3"
                                     onClick={() => handleSendRequest(user._id)}
+                                    style={{
+                                        background: 'linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888)',
+                                        color: 'white',
+                                        border: 'none'
+                                    }}
                                 >
                                     Enviar Solicitud
                                 </button>
@@ -87,57 +104,74 @@ const FriendRequests = () => {
                 ))}
             </div>
 
-            <h2 className="my-4">Solicitudes Enviadas</h2>
-            <div className="row">
+            <h2 className="my-5" style={{ color: '#dc2743' }}>Solicitudes Enviadas</h2>
+            <div className="row g-4">
                 {sentRequests.map(request => (
-                    <div key={request._id} className="col-md-4 mb-3">
-                        <div className="card text-center">
-                            <img
-                                src={request.user2Id.fotoPerfil}
-                                alt={`${request.user2Id.nombreUsuario}'s profile`}
-                                className="card-img-top rounded-circle mx-auto mt-3"
-                                style={{ width: '100px', height: '100px', objectFit: 'cover' }}
-                            />
-                            <div className="card-body">
-                                <h5 className="card-title">{request.user2Id.nombreUsuario}</h5>
-                                <p className="card-text">Estado: {request.status}</p>
+                    <div key={request._id} className="col-md-6 col-lg-4">
+                        <div className="card h-100 shadow-lg border-0 rounded-lg">
+                            <div className="card-img-top text-center py-4">
+                                <img
+                                    src={request.user2Id.fotoPerfil}
+                                    alt={`${request.user2Id.nombreUsuario}'s profile`}
+                                    className="rounded-circle"
+                                    style={{ width: '120px', height: '120px', objectFit: 'cover', border: '4px solid #f09433' }}
+                                />
+                            </div>
+                            <div className="card-body text-center">
+                                <h5 className="card-title" style={{ color: '#e6683c', fontWeight: 'bold' }}>{request.user2Id.nombreUsuario}</h5>
+                                <p className="card-text" style={{ color: '#dc2743' }}>Estado: {request.status}</p>
                             </div>
                         </div>
                     </div>
                 ))}
             </div>
 
-            <h2 className="my-4">Solicitudes Recibidas</h2>
-            <div className="row">
+            <h2 className="my-5" style={{ color: '#f09433' }}>Solicitudes Recibidas</h2>
+            <div className="row g-4">
                 {receivedRequests.map(request => (
-                    <div key={request._id} className="col-md-4 mb-3">
-                        <div className="card text-center">
-                            <img
-                                src={request.user1Id.fotoPerfil}
-                                alt={`${request.user1Id.nombreUsuario}'s profile`}
-                                className="card-img-top rounded-circle mx-auto mt-3"
-                                style={{ width: '100px', height: '100px', objectFit: 'cover' }}
-                            />
-                            <div className="card-body">
-                                <h5 className="card-title">{request.user1Id.nombreUsuario}</h5>
-                                <button
-                                    className="btn btn-success mx-2"
-                                    onClick={() => handleRespondRequest(request._id, 'accepted')}
-                                >
-                                    Aceptar
-                                </button>
-                                <button
-                                    className="btn btn-danger mx-2"
-                                    onClick={() => handleRespondRequest(request._id, 'rejected')}
-                                >
-                                    Rechazar
-                                </button>
+                    <div key={request._id} className="col-md-6 col-lg-4">
+                        <div className="card h-100 shadow-lg border-0 rounded-lg">
+                            <div className="card-img-top text-center py-4">
+                                <img
+                                    src={request.user1Id.fotoPerfil}
+                                    alt={`${request.user1Id.nombreUsuario}'s profile`}
+                                    className="rounded-circle"
+                                    style={{ width: '120px', height: '120px', objectFit: 'cover', border: '4px solid #dc2743' }}
+                                />
+                            </div>
+                            <div className="card-body text-center">
+                                <h5 className="card-title" style={{ color: '#e6683c', fontWeight: 'bold' }}>{request.user1Id.nombreUsuario}</h5>
+                                <div className="d-flex justify-content-around mt-3">
+                                    <button
+                                        className="btn"
+                                        onClick={() => handleRespondRequest(request._id, 'accepted')}
+                                        style={{
+                                            background: '#f09433',
+                                            color: 'white',
+                                            border: 'none',
+                                            boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)'
+                                        }}
+                                    >
+                                        Aceptar
+                                    </button>
+                                    <button
+                                        className="btn"
+                                        onClick={() => handleRespondRequest(request._id, 'rejected')}
+                                        style={{
+                                            background: '#dc2743',
+                                            color: 'white',
+                                            border: 'none',
+                                            boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)'
+                                        }}
+                                    >
+                                        Rechazar
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
                 ))}
             </div>
-
         </div>
     );
 };

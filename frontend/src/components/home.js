@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Header from './Header';
 
@@ -6,9 +7,10 @@ const Home = () => {
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const navigate = useNavigate();
 
-     // Obtener las publicaciones con el estado "liked" desde la base de datos
-     const fetchPosts = async () => {
+    // Obtener las publicaciones con el estado "liked" desde la base de datos
+    const fetchPosts = async () => {
         setLoading(true);
         try {
             const response = await axios.get('http://localhost:5000/post/feed', {
@@ -16,7 +18,6 @@ const Home = () => {
                     Authorization: `Bearer ${localStorage.getItem('token')}`,
                 },
             });
-            console.log(response.data);
             const updatedPosts = response.data.map(post => ({
                 ...post,
                 liked: post.liked || false, // `liked` indica si el usuario ya ha dado "like"
@@ -39,7 +40,6 @@ const Home = () => {
                 await axios.post(`http://localhost:5000/likes/add`, { post_id: postId }, {
                     headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
                 });
-                // Actualiza el estado localmente
                 setPosts(prevPosts => 
                     prevPosts.map(post => 
                         post._id === postId ? { ...post, liked: true, likes: post.likes + 1 } : post
@@ -49,7 +49,6 @@ const Home = () => {
                 await axios.post(`http://localhost:5000/likes/remove`, { post_id: postId }, {
                     headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
                 });
-                // Actualiza el estado localmente
                 setPosts(prevPosts => 
                     prevPosts.map(post => 
                         post._id === postId ? { ...post, liked: false, likes: post.likes - 1 } : post
@@ -79,9 +78,10 @@ const Home = () => {
         return `${likeUsers[0]}, ${likeUsers[1]} y otros dieron me gusta`;
     };
 
-    useEffect(() => {
-        fetchPosts();
-    }, []);
+    // Función para redirigir al usuario a la página de comentarios del post
+    const handleCommentRedirect = (postId) => {
+        navigate(`/comments/${postId}`);
+    };
 
     return (
         <div>
@@ -96,7 +96,6 @@ const Home = () => {
                     <div className="row justify-content-center">
                         {posts.map(post => (
                             <div key={post._id} className="col-md-8 mb-4">
-
                                 <div className="card shadow-sm border-0" style={{ maxHeight: '600px' }}>
                                     <div className="card-header d-flex align-items-center">
                                         <img
@@ -132,7 +131,11 @@ const Home = () => {
                                                 {renderLikeText(post.likeUsers)}
                                             </span>
                                             <span>
-                                                <i className="far fa-comment me-2 ms-3" style={{ cursor: 'pointer' }}></i>
+                                                <i
+                                                    className="far fa-comment me-2 ms-3"
+                                                    style={{ cursor: 'pointer' }}
+                                                    onClick={() => handleCommentRedirect(post._id)}
+                                                ></i>
                                                 <i className="far fa-paper-plane" style={{ cursor: 'pointer' }}></i>
                                             </span>
                                         </div>

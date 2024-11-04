@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import ReCAPTCHA from 'react-google-recaptcha';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const LoginFormComponent = ({ setIsAuthenticated }) => {
@@ -14,6 +14,7 @@ const LoginFormComponent = ({ setIsAuthenticated }) => {
     const [recaptchaToken, setRecaptchaToken] = useState(null);
     const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
+    const location = useLocation(); // Captura la ubicación desde donde el usuario intentó navegar
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -39,7 +40,6 @@ const LoginFormComponent = ({ setIsAuthenticated }) => {
                 recaptchaResponse: recaptchaToken,
             });
 
-            // Aquí asumiendo que la respuesta incluye un token
             const { token } = response.data;
 
             // Guardar el token en localStorage
@@ -47,7 +47,10 @@ const LoginFormComponent = ({ setIsAuthenticated }) => {
 
             setSuccessMessage(response.data.message);
             setIsAuthenticated(true); // Cambiar el estado de autenticación
-            navigate('/home'); // Redirigir al usuario a la página de inicio
+
+            // Navegar a la ubicación anterior o a la página principal
+            const { state } = location;
+            navigate(state?.from || '/home'); // Redirige a la ubicación anterior o a /home
         } catch (err) {
             setError(err.response ? err.response.data.message : 'Error en el servidor. Por favor, inténtalo más tarde.');
         }
@@ -55,7 +58,7 @@ const LoginFormComponent = ({ setIsAuthenticated }) => {
 
     return (
         <div className="container mt-5 d-flex justify-content-center">
-            <div className="card shadow-lg p-4" style={{ margintop: '120px', maxWidth: '400px', width: '100%', borderRadius: '15px' }}>
+            <div className="card shadow-lg p-4" style={{ maxWidth: '400px', width: '100%', borderRadius: '15px' }}>
                 <h2 className="text-center text-primary mb-4">Iniciar Sesión</h2>
                 <form onSubmit={handleSubmit}>
                     <div className="mb-3">

@@ -9,6 +9,7 @@ const postRoute = require('./routes/postRoutes');
 const messageRoutes = require('./routes/messageRoute');
 const friendRoutes = require('./routes/friendsRoute');
 const likeRoutes = require('./routes/likeRoute');
+const commentRoutes = require('./routes/commentRoute');
 
 const app = express();
 
@@ -34,6 +35,8 @@ app.use('/messages', messageRoutes);
 app.use('/friends', friendRoutes);
 
 app.use('/likes', likeRoutes);
+
+app.use('/comments', commentRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

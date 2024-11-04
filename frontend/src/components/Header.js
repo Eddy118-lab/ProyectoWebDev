@@ -27,9 +27,6 @@ const Header = ({ onLikeClick, onSaveClick }) => {
     const handleProfileClick = () => navigate('/profile/user/info');
     const handleCreateClick = () => navigate('/post/user');
     const handleFriendsClick = () => navigate('/amigos');
-    const handleChatClick = () => navigate('/chat');
-    const handleLikedClick = () => navigate('/liked');
-    const handleSavedClick = () => navigate('/saved');
     const toggleMenu = () => setShowMenu(!showMenu);
 
     const handleLogout = () => {
@@ -55,15 +52,6 @@ const Header = ({ onLikeClick, onSaveClick }) => {
                     </button>
                     <button className="btn text-dark" onClick={handleFriendsClick}>
                         <i className="fas fa-users"></i>
-                    </button>
-                    <button className="btn text-dark" onClick={handleChatClick}>
-                        <i className="fas fa-comments"></i>
-                    </button>
-                    <button className="btn text-dark" onClick={handleLikedClick}>
-                        <i className="fas fa-heart"></i>
-                    </button>
-                    <button className="btn text-dark" onClick={handleSavedClick}>
-                        <i className="fas fa-bookmark"></i>
                     </button>
                     <button className="btn text-dark" onClick={handleProfileClick}>
                         <i className="fas fa-user-circle"></i>

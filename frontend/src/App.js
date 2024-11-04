@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import RegisterFormComponent from './components/RegisterFormComponent';
 import LoginFormComponent from './components/LoginFormComponent';
 import Home from './components/home';
@@ -9,34 +9,59 @@ import Header from './components/Header';
 import Inbox from './components/inbox';
 import FriendRequests from './components/FriendRequests';
 import PostEdit from './components/PostEdit';
+import CommentsList from './components/CommentsList';
+
+function SaveLastValidRoute() {
+  const location = useLocation();
+  useEffect(() => {
+    localStorage.setItem('lastValidRoute', location.pathname);
+  }, [location]);
+
+  return null;
+}
+
+function RedirectToLastValidRoute({ isAuthenticated }) {
+  const navigate = useNavigate(); // Asegúrate de que useNavigate esté importado
+  useEffect(() => {
+    if (isAuthenticated) {
+      const lastValidRoute = localStorage.getItem('lastValidRoute') || '/home';
+      navigate(lastValidRoute);
+    }
+  }, [isAuthenticated, navigate]);
+
+  return null;
+}
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    // Verifica si hay un token y establece el estado de autenticación
-    if (token) {
-      setIsAuthenticated(true);
-    }
+    setIsAuthenticated(!!token);
+    setLoading(false);
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem('token'); // Eliminar el token
-    setIsAuthenticated(false); // Cambiar el estado de autenticación
+    localStorage.removeItem('token');
+    localStorage.removeItem('lastValidRoute');
+    setIsAuthenticated(false);
   };
+
+  if (loading) {
+    return <div>Cargando...</div>;
+  }
 
   return (
     <Router>
-      {/* Renderiza el Header solo si el usuario está autenticado */}
       {isAuthenticated && <Header setIsAuthenticated={setIsAuthenticated} handleLogout={handleLogout} />}
-
+      <SaveLastValidRoute />
+      <RedirectToLastValidRoute isAuthenticated={isAuthenticated} />
+      
       <Routes>
-        {/* Rutas públicas */}
         <Route path="/register/form" element={<RegisterFormComponent />} />
         <Route path="/login/form" element={<LoginFormComponent setIsAuthenticated={setIsAuthenticated} />} />
 
-        {/* Rutas privadas */}
         {isAuthenticated ? (
           <>
             <Route path="/home" element={<Home />} />
@@ -45,13 +70,13 @@ function App() {
             <Route path="/profile/user/edit/:id" element={<PostEdit />} />
             <Route path="/amigos" element={<FriendRequests />} />
             <Route path="/chat" element={<Inbox />} />
+            <Route path="/comments/:postId" element={<CommentsList />} />
           </>
         ) : (
           <Route path="*" element={<Navigate to="/login/form" />} />
         )}
 
-        {/* Ruta de inicio */}
-        <Route path="/" element={<Navigate to="/login/form" />} />
+        <Route path="/" element={<Navigate to="/home" />} />
       </Routes>
     </Router>
   );

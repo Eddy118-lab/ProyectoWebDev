@@ -54,12 +54,9 @@ const PostEdit = () => {
         const formData = new FormData();
         if (contenido) formData.append('contenido', contenido);
         if (imagen) formData.append('imagen_url', imagen);
-
-        console.log('Datos enviados en la actualización:', { contenido, imagen });
-
+    
         try {
-            // Realizar la solicitud de actualización de la publicación
-            const response = await axios.put(`http://localhost:5000/post/update/${postId}`, formData, {
+            const response = await axios.put('http://localhost:5000/post/update', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                     Authorization: `Bearer ${token}`,
@@ -71,6 +68,7 @@ const PostEdit = () => {
             console.error('Error al editar el post:', error);
         }
     };
+    
 
     if (loading) return <p>Cargando publicación...</p>;
 
