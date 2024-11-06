@@ -1,6 +1,5 @@
 const UserModel = require('../models/userModel');
 const FriendModel = require('../models/friendModel');
-const MessageModel = require('../models/messageModel');
 const CommentModel = require('../models/commentModel');
 const PostModel = require('../models/postModel');
 

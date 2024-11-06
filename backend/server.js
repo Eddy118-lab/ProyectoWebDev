@@ -6,7 +6,6 @@ const registerRoute = require('./routes/registerRoute'); // Ajusta la ruta segú
 const loginRoute = require('./routes/loginRoute');
 const userRoute = require('./routes/userRoutes');
 const postRoute = require('./routes/postRoutes');
-const messageRoutes = require('./routes/messageRoute');
 const friendRoutes = require('./routes/friendsRoute');
 const likeRoutes = require('./routes/likeRoute');
 const commentRoutes = require('./routes/commentRoute');

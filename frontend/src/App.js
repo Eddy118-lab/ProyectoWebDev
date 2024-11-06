@@ -6,7 +6,6 @@ import Home from './components/home';
 import PerfilComponent from './components/PerfilComponent';
 import PostComponent from './components/PostComponent';
 import Header from './components/Header';
-import Inbox from './components/inbox';
 import FriendRequests from './components/FriendRequests';
 import PostEdit from './components/PostEdit';
 import CommentsList from './components/CommentsList';
@@ -69,7 +68,6 @@ function App() {
             <Route path="/post/user" element={<PostComponent />} />
             <Route path="/profile/user/edit/:id" element={<PostEdit />} />
             <Route path="/amigos" element={<FriendRequests />} />
-            <Route path="/chat" element={<Inbox />} />
             <Route path="/comments/:postId" element={<CommentsList />} />
           </>
         ) : (
