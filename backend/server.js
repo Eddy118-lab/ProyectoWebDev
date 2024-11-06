@@ -30,8 +30,6 @@ app.use('/feed', userRoute);
 
 app.use('/post', postRoute);
 
-app.use('/messages', messageRoutes);
-
 app.use('/friends', friendRoutes);
 
 app.use('/likes', likeRoutes);
